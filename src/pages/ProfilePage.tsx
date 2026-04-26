@@ -89,7 +89,7 @@ const ProfilePage: React.FC = () => {
           <h1 className="text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899]">
             Profile
           </h1>
-          <p className="text-gray-400">Manage your AuraQ profile</p>
+          <p className="text-gray-400">Manage your SkillQ profile</p>
         </motion.div>
 
         <motion.div 

@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#ec4899]">
-              AuraQ
+              SkillQ
             </h3>
             <p className="text-gray-400 mt-2">Explore the universe of knowledge</p>
           </div>
@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/10 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} AuraQ. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} SkillQ. All rights reserved.</p>
         </div>
       </div>
     </footer>

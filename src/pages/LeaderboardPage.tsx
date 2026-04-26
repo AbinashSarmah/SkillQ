@@ -74,7 +74,7 @@ const LeaderboardPage: React.FC = () => {
           <h1 className="text-3xl sm:text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] group-hover:from-[#6366f1] group-hover:via-[#8b5cf6] group-hover:to-[#ec4899] transition-all duration-500">
             Global Leaderboard
           </h1>
-          <p className="text-gray-400 group-hover:text-white transition-colors duration-300">Top performers in the AuraQ universe</p>
+          <p className="text-gray-400 group-hover:text-white transition-colors duration-300">Top performers in the SkillQ universe</p>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </motion.div>
 

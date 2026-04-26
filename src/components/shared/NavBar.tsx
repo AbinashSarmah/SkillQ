@@ -64,8 +64,8 @@ const NavBar: React.FC = () => {
       >
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity duration-200">
-            <img src="/auraq1.png" alt="AuraQ Logo" className="w-8 h-8" />
-            AuraQ
+            <img src="/auraq1.png" alt="SkillQ Logo" className="w-8 h-8" />
+            SkillQ
           </Link>
 
           <div className="flex items-center gap-4">

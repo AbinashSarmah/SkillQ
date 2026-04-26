@@ -67,7 +67,7 @@ const SettingsPage: React.FC = () => {
           <h1 className="text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] hover:bg-gradient-to-r hover:from-[#6366f1] hover:via-[#8b5cf6] hover:to-[#ec4899] transition-all duration-300">
             Settings
           </h1>
-          <p className="text-gray-400">Customize your AuraQ experience</p>
+          <p className="text-gray-400">Customize your SkillQ experience</p>
         </motion.div>
 
         <motion.div 

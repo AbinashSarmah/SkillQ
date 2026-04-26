@@ -91,11 +91,11 @@ const Sidebar: React.FC<{ openSidebar: boolean, setOpenSidebar: (open: boolean) 
                 >
                   <img 
                     src="/auraq1.png" 
-                    alt="AuraQ Logo" 
+                    alt="SkillQ Logo" 
                     className="h-8 w-auto"
                   />
                   <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899]">
-                    AuraQ
+                    SkillQ
                   </h1>
                 </motion.div>
               )}

@@ -117,7 +117,7 @@ const AuthenticationPage: React.FC = () => {
         <div className="bg-[#1a1a2e]/90 backdrop-blur-sm rounded-xl shadow-2xl p-8 border border-[#2a2a3a]">
           <motion.div variants={itemVariants} className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] mb-2">
-              Welcome to AuraQ
+              Welcome to SkillQ
             </h1>
             <p className="text-gray-400">Sign in to continue your journey</p>
           </motion.div>

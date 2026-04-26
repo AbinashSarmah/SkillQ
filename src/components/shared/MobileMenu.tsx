@@ -78,8 +78,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
 
               {/* Logo */}
               <div className="flex items-center gap-2 mb-8">
-                <img src="/auraq1.png" alt="AuraQ Logo" className="w-8 h-8" />
-                <span className="text-2xl font-bold text-white">AuraQ</span>
+                <img src="/auraq1.png" alt="SkillQ Logo" className="w-8 h-8" />
+                <span className="text-2xl font-bold text-white">SkillQ</span>
               </div>
 
               {/* Navigation Links */}
