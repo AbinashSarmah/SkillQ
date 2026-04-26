@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuiz, useNotification, useAudio } from '../contexts/index';
-import { mockQuizzes } from '../data/mockQuizzes';
+import { getQuizById, submitQuizAttempt } from '../api/quizzes';
 import QuizCompletionScreen from '../components/quiz/QuizCompletionScreen';
 import BackButton from '../components/shared/BackButton';
 import { Question } from '../types';
@@ -30,6 +30,9 @@ const QuizPlayPage: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [activePowerUp, setActivePowerUp] = useState<string | null>(null);
+  const [submittedAttempt, setSubmittedAttempt] = useState(false);
+  const [answerHistory, setAnswerHistory] = useState<Array<{ selectedAnswer: number; timeLeft: number }>>([]);
+  const [loadedQuizId, setLoadedQuizId] = useState<string | null>(null);
 
   // Memoize current question data
   const currentQuestionData: Question | undefined = useMemo(() => 
@@ -39,10 +42,17 @@ const QuizPlayPage: React.FC = () => {
 
   // Load quiz data
   useEffect(() => {
-    if (quizId) {
+    if (!quizId) {
+      return;
+    }
+    if (loadedQuizId === quizId) {
+      return;
+    }
+
+    const loadQuiz = async () => {
       setIsLoading(true);
       try {
-        const quiz = mockQuizzes.find(q => q.id === quizId);
+        const quiz = await getQuizById(quizId);
         if (quiz) {
           // Reset all quiz state
           setQuiz(quiz);
@@ -60,10 +70,9 @@ const QuizPlayPage: React.FC = () => {
             time: 1
           });
           setShowCompletionScreen(false);
-          addNotification({
-            message: 'Quiz loaded successfully!',
-            type: 'success'
-          });
+          setSubmittedAttempt(false);
+          setAnswerHistory([]);
+          setLoadedQuizId(quizId);
         } else {
           throw new Error('Quiz not found');
         }
@@ -76,8 +85,10 @@ const QuizPlayPage: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    }
-  }, [quizId]);
+    };
+
+    loadQuiz();
+  }, [quizId, loadedQuizId, navigate, setCurrentQuestion, setQuiz, setScore, setShowCompletionScreen, addNotification]);
 
   // Timer effect with proper dependencies
   useEffect(() => {
@@ -145,6 +156,7 @@ const QuizPlayPage: React.FC = () => {
     if (isAnswerRevealed || !currentQuestionData) return;
     
     setSelectedAnswer(answerIndex);
+    setAnswerHistory((prev) => [...prev, { selectedAnswer: answerIndex, timeLeft }]);
     setIsAnswerRevealed(true);
     
     if (answerIndex === currentQuestionData.correctAnswer) {
@@ -158,6 +170,27 @@ const QuizPlayPage: React.FC = () => {
       setStreak(0);
     }
   }, [isAnswerRevealed, currentQuestionData, playSound, updateScore, calculateScore]);
+
+  useEffect(() => {
+    const syncAttempt = async () => {
+      if (!showCompletionScreen || !quizId || submittedAttempt || !currentQuiz) {
+        return;
+      }
+
+      try {
+        await submitQuizAttempt(quizId, {
+          answers: answerHistory,
+          clientScore: score,
+        });
+      } catch {
+        // Keep completion flow visible even if sync fails.
+      } finally {
+        setSubmittedAttempt(true);
+      }
+    };
+
+    syncAttempt();
+  }, [showCompletionScreen, quizId, submittedAttempt, answerHistory, score, currentQuiz]);
 
   const handleSkipQuestion = () => {
     if (powerUps.skip > 0) {
@@ -384,6 +417,7 @@ const QuizPlayPage: React.FC = () => {
         {showCompletionScreen && (
           <QuizCompletionScreen
             score={score}
+            quizId={quizId || ''}
             onClose={() => {
               setShowCompletionScreen(false);
               navigate('/', { replace: true });

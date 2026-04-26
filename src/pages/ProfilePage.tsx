@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/index';
 import { FaUser, FaCamera, FaSave, FaTimes, FaTrophy, FaStar } from 'react-icons/fa';
 import BackButton from '../components/shared/BackButton';
+import { getMyStats, updateMe } from '../api/profile';
 
 const FaUser1 = FaUser as React.FC<React.SVGProps<SVGSVGElement>>;
 const FaCamera1 = FaCamera as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -21,6 +22,25 @@ const ProfilePage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [followers, setFollowers] = useState(128);
   const [following, setFollowing] = useState(64);
+  const [quizCount, setQuizCount] = useState(42);
+  const [points, setPoints] = useState(1250);
+  const rank = '#15';
+
+  React.useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const stats = await getMyStats();
+        setQuizCount(stats.quizzesTaken || 0);
+        setPoints(stats.totalScore || 0);
+        setFollowers(stats.followers || 0);
+        setFollowing(stats.following || 0);
+      } catch {
+        // keep existing values if API is unavailable
+      }
+    };
+
+    loadStats();
+  }, []);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -38,19 +58,31 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSave = () => {
-    if (newUsername.trim() && newUsername !== user?.username) {
-      updateUser({
-        ...user,
-        username: newUsername,
-        avatar: {
-          baseCharacter: avatarPreview,
-          accessories: user?.avatar.accessories || [],
-          colors: user?.avatar.colors || {},
-          unlocks: user?.avatar.unlocks || []
-        }
-      });
-    }
-    setIsEditing(false);
+    const save = async () => {
+      if (!newUsername.trim()) {
+        setIsEditing(false);
+        return;
+      }
+
+      try {
+        const updated = await updateMe({
+          username: newUsername,
+          avatar: {
+            baseCharacter: avatarPreview,
+            accessories: user?.avatar.accessories || [],
+            colors: user?.avatar.colors || {},
+            unlocks: user?.avatar.unlocks || []
+          }
+        });
+        updateUser(updated);
+      } catch {
+        // keep previous values on failure
+      } finally {
+        setIsEditing(false);
+      }
+    };
+
+    save();
   };
 
   const handleCancel = () => {
@@ -147,7 +179,7 @@ const ProfilePage: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">42</div>
+                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">{quizCount}</div>
                 <div className="text-gray-400 group-hover:text-white transition-colors duration-300">Quizzes</div>
               </motion.div>
               <motion.div 
@@ -156,7 +188,7 @@ const ProfilePage: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">1,250</div>
+                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">{points.toLocaleString()}</div>
                 <div className="text-gray-400 group-hover:text-white transition-colors duration-300">Points</div>
               </motion.div>
               <motion.div 
@@ -165,7 +197,7 @@ const ProfilePage: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#3b82f6] via-[#a855f7] to-[#ec4899] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">#15</div>
+                <div className="text-2xl font-bold text-[#3b82f6] group-hover:text-[#8b5cf6] transition-colors duration-300">{rank}</div>
                 <div className="text-gray-400 group-hover:text-white transition-colors duration-300">Rank</div>
               </motion.div>
             </div>

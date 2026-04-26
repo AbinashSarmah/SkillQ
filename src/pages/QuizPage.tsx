@@ -158,6 +158,7 @@ const QuizPage: React.FC = () => {
       {showCompletionScreen && (
         <QuizCompletionScreen
           score={score}
+          quizId={id || ''}
           onClose={() => setShowCompletionScreen(false)}
         />
       )}

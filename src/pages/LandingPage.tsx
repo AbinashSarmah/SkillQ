@@ -4,7 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import QuizCard from '../components/shared/QuizCard';
 import { useAuth } from '../contexts/index';
 import { FaRocket, FaUsers, FaPenFancy, FaGamepad, FaPlus, FaHome, FaGithub, FaTwitter, FaLinkedin, FaDiscord, FaBell } from 'react-icons/fa';
-import { mockQuizzes } from '../data/mockQuizzes';
+import { Quiz } from '../types';
+import { getQuizzes } from '../api/quizzes';
+import { getNotifications } from '../api/notifications';
 import TypewriterText from '../components/shared/TypewriterText';
 import Footer from '../components/shared/Footer';
 
@@ -66,15 +68,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ scrollTo }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications] = useState([
-    { id: 1, message: "New quiz available: Space Exploration", time: "2 hours ago" },
-    { id: 2, message: "Your friend completed a quiz", time: "5 hours ago" },
-    { id: 3, message: "Weekly leaderboard updated", time: "1 day ago" }
-  ]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [notifications, setNotifications] = useState<Array<{ id: string; message: string; time: string }>>([]);
 
   const isRow1InView = useInView(row1Ref, { once: true, margin: "-100px" });
   const isRow2InView = useInView(row2Ref, { once: true, margin: "-100px" });
   const isRow3InView = useInView(row3Ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    const loadQuizzes = async () => {
+      try {
+        const data = await getQuizzes();
+        setQuizzes(data);
+      } catch {
+        setQuizzes([]);
+      }
+    };
+
+    loadQuizzes();
+  }, []);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifications(data);
+      } catch {
+        setNotifications([]);
+      }
+    };
+
+    loadNotifications();
+  }, []);
 
   useEffect(() => {
     if (scrollTo === 'featured' && featuredSectionRef.current) {
@@ -298,7 +323,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ scrollTo }) => {
             {/* First Row */}
             <div ref={row1Ref} className="col-span-full">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockQuizzes.slice(0, 3).map((quiz, index) => {
+                {quizzes.slice(0, 3).map((quiz, index) => {
                   let initialX = 0;
                   let initialY = 0;
                   
@@ -331,7 +356,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ scrollTo }) => {
             {/* Second Row */}
             <div ref={row2Ref} className="col-span-full mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockQuizzes.slice(3, 6).map((quiz, index) => {
+                {quizzes.slice(3, 6).map((quiz, index) => {
                   let initialX = 0;
                   let initialY = 0;
                   
@@ -364,7 +389,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ scrollTo }) => {
             {/* Third Row */}
             <div ref={row3Ref} className="col-span-full mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockQuizzes.slice(6, 9).map((quiz, index) => {
+                {quizzes.slice(6, 9).map((quiz, index) => {
                   let initialX = 0;
                   let initialY = 0;
                   

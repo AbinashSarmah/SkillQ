@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGoogle, FaEnvelope, FaLock } from 'react-icons/fa';
 import { useAuth } from '../contexts/index';
+import { getMe } from '../api/profile';
 const GoogleIcon = FaGoogle as React.FC<React.SVGProps<SVGSVGElement>>;
 const EnvelopeIcon = FaEnvelope as React.FC<React.SVGProps<SVGSVGElement>>;
 const LockIcon = FaLock as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -21,28 +22,9 @@ const AuthenticationPage: React.FC = () => {
     setError('');
 
     try {
-      // Accept any credentials and redirect to main landing page
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-      setUser({
-        id: '1',
-        username: 'testuser',
-        avatar: {
-          baseCharacter: 'default',
-          accessories: [],
-          colors: {},
-          unlocks: [],
-        },
-        stats: {
-          totalScore: 0,
-          quizzesTaken: 0,
-          winRate: 0,
-          categoryScores: {},
-          streakDays: 0,
-          achievements: [],
-        },
-        inventory: [],
-        friends: [],
-      });
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const me = await getMe();
+      setUser(me);
       navigate('/', { replace: true });
     } catch (err) {
       setError('Authentication failed. Please try again.');
@@ -56,29 +38,10 @@ const AuthenticationPage: React.FC = () => {
     setError('');
 
     try {
-      // Accept any Google sign-in and redirect to main landing page
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const me = await getMe();
+      setUser(me);
       navigate('/', { replace: true });
-      setUser({
-        id: '1',
-        username: 'testuser',
-        avatar: {
-          baseCharacter: 'default',
-          accessories: [],
-          colors: {},
-          unlocks: [],
-        },
-        stats: {
-          totalScore: 0,
-          quizzesTaken: 0,
-          winRate: 0,
-          categoryScores: {},
-          streakDays: 0,
-          achievements: [],
-        },
-        inventory: [],
-        friends: [],
-      });
     } catch (err) {
       setError('Google sign-in failed. Please try again.');
     } finally {

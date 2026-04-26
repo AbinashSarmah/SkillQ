@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts';
 import { FaSun, FaMoon, FaSignOutAlt, FaMusic, FaVolumeUp, FaBell, FaTrophy } from 'react-icons/fa';
 import BackButton from '../components/shared/BackButton';
+import { getMySettings, updateMySettings } from '../api/profile';
 
 const FaSun1 = FaSun as React.FC<React.SVGProps<SVGSVGElement>>;
 const FaMoon1 = FaMoon as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -28,6 +29,24 @@ const SettingsPage: React.FC = () => {
   });
 
   useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await getMySettings();
+        setSettings({
+          backgroundMusic: data.backgroundMusic,
+          soundEffects: data.soundEffects,
+          quizReminders: data.quizReminders,
+          achievementAlerts: data.achievementAlerts,
+        });
+      } catch {
+        // keep defaults
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -38,14 +57,26 @@ const SettingsPage: React.FC = () => {
   }, [isDarkMode]);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    updateMySettings({ theme: next ? 'dark' : 'light' }).catch(() => {
+      // keep optimistic theme update
+    });
   };
 
   const toggleSetting = (setting: keyof typeof settings) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
+    setSettings(prev => {
+      const updated = {
+        ...prev,
+        [setting]: !prev[setting]
+      };
+
+      updateMySettings(updated).catch(() => {
+        // keep optimistic UI
+      });
+
+      return updated;
+    });
   };
 
   return (

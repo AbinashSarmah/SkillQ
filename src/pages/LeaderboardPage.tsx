@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCrown, FaMedal, FaTrophy, FaChevronDown, FaChevronUp, FaGamepad, FaStar } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
-import { mockGlobalLeaderboardData } from '../data/mockGlobalLeaderboard';
+import { getGlobalLeaderboard } from '../api/quizzes';
 import BackButton from '../components/shared/BackButton';
 
 const FaCrown1 = FaCrown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -27,18 +27,32 @@ const BATCH_SIZE = 8;
 const LeaderboardPage: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const { ref, inView } = useInView({
     threshold: 0,
     rootMargin: '200px',
   });
 
   React.useEffect(() => {
-    if (inView && visibleCount < mockGlobalLeaderboardData.length) {
+    if (inView && visibleCount < entries.length) {
       window.requestAnimationFrame(() => {
         setVisibleCount((prev) => prev + BATCH_SIZE);
       });
     }
-  }, [inView]);
+  }, [inView, visibleCount, entries.length]);
+
+  React.useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const data = await getGlobalLeaderboard();
+        setEntries(data);
+      } catch {
+        setEntries([]);
+      }
+    };
+
+    loadLeaderboard();
+  }, []);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -53,7 +67,7 @@ const LeaderboardPage: React.FC = () => {
     }
   };
 
-  const visibleEntries = mockGlobalLeaderboardData.slice(0, visibleCount);
+  const visibleEntries = entries.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-[#0a0a1a] relative overflow-hidden">

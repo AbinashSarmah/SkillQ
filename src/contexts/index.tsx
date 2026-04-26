@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, Quiz } from '../types';
+import { getMe } from '../api/profile';
 
 // Auth Context
 interface AuthContextType {
@@ -14,26 +15,20 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>({
-    id: '1',
-    username: 'testuser',
-    avatar: {
-      baseCharacter: 'default',
-      accessories: [],
-      colors: {},
-      unlocks: [],
-    },
-    stats: {
-      totalScore: 0,
-      quizzesTaken: 0,
-      winRate: 0,
-      categoryScores: {},
-      streakDays: 0,
-      achievements: [],
-    },
-    inventory: [],
-    friends: [],
-  });
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const me = await getMe();
+        setUser(me);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    loadUser();
+  }, []);
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {

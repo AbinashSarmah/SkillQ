@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Player } from '../../types';
-import { mockLeaderboardData } from '../../data/mockLeaderboard';
+import { getQuizLeaderboard } from '../../api/quizzes';
 import { FaTimes } from 'react-icons/fa';
 
 const FaTimes1 = FaTimes as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -10,40 +10,47 @@ const FaTimes1 = FaTimes as React.FC<React.SVGProps<SVGSVGElement>>;
 interface QuizCompletionScreenProps {
   score: number;
   onClose: () => void;
+  quizId: string;
 }
 
-const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({ score, onClose }) => {
+const QuizCompletionScreen: React.FC<QuizCompletionScreenProps> = ({ score, onClose, quizId }) => {
   const navigate = useNavigate();
   const [leaderboardData, setLeaderboardData] = useState<Player[]>([]);
 
   useEffect(() => {
-    // Simulate API call to get leaderboard data
     const fetchLeaderboardData = async () => {
-      // Add current user's score to the leaderboard
-      const updatedLeaderboard = [
-        ...mockLeaderboardData,
-        {
-          id: 'current-user',
-          username: 'You',
-          score: score,
-          rank: 0,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=You'
-        }
-      ];
+      try {
+        const data = await getQuizLeaderboard(quizId);
+        const withCurrent = [
+          ...data,
+          {
+            id: 'current-user',
+            username: 'You',
+            score,
+            rank: 0,
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=You',
+          },
+        ];
 
-      // Sort by score and assign ranks
-      const sortedLeaderboard = updatedLeaderboard
-        .sort((a, b) => b.score - a.score)
-        .map((player, index) => ({
-          ...player,
-          rank: index + 1
-        }));
-
-      setLeaderboardData(sortedLeaderboard);
+        const sortedLeaderboard = withCurrent
+          .sort((a, b) => b.score - a.score)
+          .map((player, index) => ({ ...player, rank: index + 1 }));
+        setLeaderboardData(sortedLeaderboard);
+      } catch {
+        setLeaderboardData([
+          {
+            id: 'current-user',
+            username: 'You',
+            score,
+            rank: 1,
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=You',
+          },
+        ]);
+      }
     };
 
     fetchLeaderboardData();
-  }, [score]);
+  }, [score, quizId]);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },

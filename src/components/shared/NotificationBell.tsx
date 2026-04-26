@@ -1,19 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaBell } from 'react-icons/fa';
+import { getNotifications, markNotificationRead } from '../../api/notifications';
 
 const FaBell1 = FaBell as React.FC<React.SVGProps<SVGSVGElement>>;
 
-const mockNotifications = [
-  { id: 1, message: 'New quiz available: Space Exploration', time: '2 hours ago' },
-  { id: 2, message: 'Your quiz has been played 10 times', time: '1 day ago' },
-  { id: 3, message: 'You earned a new achievement: Quiz Master', time: '2 days ago' },
-];
-
 const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const unreadCount = mockNotifications.length;
+  const [notifications, setNotifications] = useState<Array<{ id: string; message: string; time: string; read: boolean }>>([]);
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifications(data);
+      } catch {
+        setNotifications([]);
+      }
+    };
+
+    loadNotifications();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleRead = async (id: string) => {
+    try {
+      await markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, read: true } : item))
+      );
+    } catch {
+      // keep current UI behavior on failure
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,10 +77,11 @@ const NotificationBell: React.FC = () => {
               <h3 className="font-semibold text-white">Notifications</h3>
             </div>
             <div className="max-h-96 overflow-y-auto">
-              {mockNotifications.map((notification) => (
+              {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="p-4 border-b border-purple-400/30 hover:bg-purple-500/30 transition-colors duration-300"
+                  className="p-4 border-b border-purple-400/30 hover:bg-purple-500/30 transition-colors duration-300 cursor-pointer"
+                  onClick={() => handleRead(notification.id)}
                 >
                   <p className="text-sm text-white">{notification.message}</p>
                   <p className="text-xs text-white/60 mt-1">{notification.time}</p>

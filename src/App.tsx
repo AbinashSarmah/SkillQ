@@ -21,7 +21,6 @@ import AuthenticationPage from './pages/AuthenticationPage';
 
 // Shared Components
 import NavBar from './components/shared/NavBar';
-import NotificationBell from './components/shared/NotificationBell';
 import ScrollToTop from './components/shared/ScrollToTop';
 import Sidebar from './components/shared/Sidebar';
 

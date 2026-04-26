@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Category, addNewCategory } from '../data/mockCategories';
+import { Category } from '../types';
+import { createCategory } from '../api/categories';
 import { FaTimes, FaPlus, FaRocket } from 'react-icons/fa';
 
 interface CategoryModalProps {
@@ -19,7 +20,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onCatego
     icon: 'FaBook'
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!newCategory.name || !newCategory.description) {
       return;
     }
@@ -31,10 +32,14 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose, onCatego
       icon: newCategory.icon || 'FaBook'
     };
 
-    addNewCategory(category);
-    onCategoryAdded(category);
-    onClose();
-    setNewCategory({ name: '', description: '', icon: 'FaBook' });
+    try {
+      const created = await createCategory(category);
+      onCategoryAdded(created);
+      onClose();
+      setNewCategory({ name: '', description: '', icon: 'FaBook' });
+    } catch {
+      // keep modal open if request fails
+    }
   };
 
   return (

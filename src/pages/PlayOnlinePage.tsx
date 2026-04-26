@@ -33,7 +33,8 @@ import {
   FaHourglass,
   FaStar
 } from 'react-icons/fa';
-import { mockQuizzes } from '../data/mockQuizzes';
+import { Quiz } from '../types';
+import { getQuizzes } from '../api/quizzes';
 
 const RocketIcon = FaRocket as React.FC<React.SVGProps<SVGSVGElement>>;
 const UsersIcon = FaUsers as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -115,17 +116,31 @@ const PlayOnlinePage: React.FC = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isTimeOpen, setIsTimeOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
 
   const timeRanges = ['Any', '0-5 min', '5-10 min', '10-15 min', '15+ min'];
   const ratingRanges = ['Any', '4+ Stars', '3+ Stars', '2+ Stars'];
 
-  const categories = useMemo(() => {
-    const uniqueCategories = new Set(mockQuizzes.map(quiz => quiz.category));
-    return ['All', ...Array.from(uniqueCategories)];
+  React.useEffect(() => {
+    const loadQuizzes = async () => {
+      try {
+        const data = await getQuizzes();
+        setQuizzes(data);
+      } catch {
+        setQuizzes([]);
+      }
+    };
+
+    loadQuizzes();
   }, []);
 
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(quizzes.map(quiz => quiz.category));
+    return ['All', ...Array.from(uniqueCategories)];
+  }, [quizzes]);
+
   const filteredQuizzes = useMemo(() => {
-    return mockQuizzes.filter(quiz => {
+    return quizzes.filter(quiz => {
       const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           quiz.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || quiz.category === selectedCategory;
@@ -148,7 +163,7 @@ const PlayOnlinePage: React.FC = () => {
 
       return matchesSearch && matchesCategory && matchesTime && matchesRating;
     });
-  }, [searchQuery, selectedCategory, selectedTime, selectedRating]);
+  }, [quizzes, searchQuery, selectedCategory, selectedTime, selectedRating]);
 
   const handleJoinSession = (quizId: string) => {
     setLoadingQuizId(quizId);

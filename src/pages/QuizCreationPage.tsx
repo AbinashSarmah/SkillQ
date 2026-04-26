@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotification } from '../contexts';
 import { Quiz, Question, QuestionType, Category } from '../types';
-import { mockQuizzes } from '../data/mockQuizzes';
-import { mockCategories } from '../data/mockCategories';
+import { createQuiz } from '../api/quizzes';
+import { getCategories } from '../api/categories';
 import DifficultySlider from '../components/DifficultySlider';
 import TimeLimitSelector from '../components/TimeLimitSelector';
 import CategoryModal from '../components/CategoryModal';
@@ -140,6 +140,20 @@ const QuizCreationPage: React.FC = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch {
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const questionTypes: { value: QuestionType; label: string; icon: any; description: string }[] = [
     {
@@ -429,8 +443,7 @@ const QuizCreationPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const newQuiz: Quiz = {
-        id: Math.random().toString(36).substr(2, 9),
+      const newQuizPayload: Partial<Quiz> = {
         title: quizData.title || '',
         description: quizData.description || '',
         category: quizData.category || '',
@@ -445,8 +458,8 @@ const QuizCreationPage: React.FC = () => {
         createdAt: new Date()
       };
 
-      mockQuizzes.push(newQuiz);
-      setCreatedQuizId(newQuiz.id);
+      const created = await createQuiz(newQuizPayload);
+      setCreatedQuizId(created.id);
       setShowSuccessPopup(true);
     } catch (error) {
       console.error('Error creating quiz:', error);
@@ -460,7 +473,7 @@ const QuizCreationPage: React.FC = () => {
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    const category = mockCategories.find(c => c.id === categoryId);
+    const category = categories.find(c => c.id === categoryId);
     if (category) {
       setQuizData(prev => ({
         ...prev,
@@ -622,7 +635,7 @@ const QuizCreationPage: React.FC = () => {
                         } rounded-lg focus:ring-2 focus:ring-[#6366f1] text-white appearance-none`}
                       >
                         <option value="">Select a category</option>
-                        {mockCategories.map(category => (
+                        {categories.map(category => (
                           <option key={category.id} value={category.id}>
                             {category.name}
                           </option>
